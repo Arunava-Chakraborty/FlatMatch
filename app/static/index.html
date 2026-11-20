@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#ff4f6d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>FlatMatch - find your flatmate</title>
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<div id="app">
+  <section id="auth" class="screen">
+    <div class="brand"><div class="logo">FM</div><h1>FlatMatch</h1><p>Swipe right on your next flatmate</p></div>
+    <div class="tabs"><button class="tab active" data-auth="login">Log in</button><button class="tab" data-auth="signup">Sign up</button></div>
+    <form id="authForm" autocomplete="on" novalidate>
+      <div class="signup-only"><input name="name" placeholder="First name" maxlength="40" autocomplete="given-name"></div>
+      <div class="signup-only"><input name="age" type="number" inputmode="numeric" placeholder="Age (18+)" min="18" max="99"></div>
+      <input name="email" type="email" placeholder="Email" autocomplete="email" maxlength="120" required>
+      <input name="password" type="password" placeholder="Password (min 8 chars)" autocomplete="current-password" minlength="8" maxlength="128" required>
+      <p class="err" id="authErr"></p>
+      <button class="btn primary" type="submit" id="authBtn">Log in</button>
+    </form>
+  </section>
+
+  <section id="main" class="screen hidden">
+    <header class="topbar">
+      <span class="icon-btn"></span>
+      <span class="title" id="topTitle">Discover</span>
+      <button class="icon-btn" id="filterBtn" aria-label="Filters"><svg viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg></button>
+    </header>
+
+    <div class="view" id="v-discover">
+      <div id="filters" class="filters hidden">
+        <input id="fCity" placeholder="City" maxlength="40">
+        <input id="fBudget" type="number" inputmode="numeric" placeholder="Max rent (Rs)">
+        <button class="btn small primary" id="fApply">Apply</button>
+      </div>
+      <div class="deck" id="deck"></div>
+      <div class="empty hidden" id="deckEmpty"><h3>No more profiles</h3><p>Try changing filters or check back later.</p></div>
+      <div class="actions">
+        <button class="round undo" id="bUndo" aria-label="Rewind"><svg viewBox="0 0 24 24"><path d="M4 9h11a5 5 0 010 10H8M4 9l4-4M4 9l4 4"/></svg></button>
+        <button class="round nope" id="bNope" aria-label="Pass"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <button class="round super" id="bSuper" aria-label="Super like"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></button>
+        <button class="round like" id="bLike" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="view hidden" id="v-matches">
+      <div id="matchList" class="list"></div>
+      <div class="empty hidden" id="matchEmpty"><h3>No matches yet</h3><p>Keep swiping - when someone likes you back, they show up here.</p></div>
+    </div>
+
+    <div class="view hidden" id="v-profile">
+      <form id="profileForm" class="pform" novalidate>
+        <p class="hint" id="completeHint">Complete your city and budget so others can find you.</p>
+        <label>Name<input name="name" maxlength="40" required></label>
+        <div class="row">
+          <label>Age<input name="age" type="number" inputmode="numeric" min="18" max="99"></label>
+          <label>Gender<select name="gender"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></label>
+        </div>
+        <div class="row">
+          <label>City<input name="city" maxlength="40" placeholder="e.g. Pune"></label>
+          <label>Area<input name="area" maxlength="60" placeholder="e.g. Hinjewadi"></label>
+        </div>
+        <label>I am<select name="looking"><option value="room">Looking for a room</option><option value="roommate">Have a room, need a flatmate</option></select></label>
+        <div class="row">
+          <label>Min rent (Rs)<input name="budget_min" type="number" inputmode="numeric" min="0"></label>
+          <label>Max rent (Rs)<input name="budget_max" type="number" inputmode="numeric" min="0"></label>
+        </div>
+        <div class="row">
+          <label>Move-in date<input name="move_in" type="date"></label>
+          <label>Occupation<input name="occupation" maxlength="60"></label>
+        </div>
+        <label>About me<textarea name="bio" maxlength="500" rows="3" placeholder="Work hours, hobbies, what you want in a flatmate..."></textarea></label>
+        <h4>Lifestyle</h4>
+        <div class="toggles">
+          <label class="chip"><input type="checkbox" name="smoking"><span>Smoker</span></label>
+          <label class="chip"><input type="checkbox" name="drinks"><span>Drinks</span></label>
+          <label class="chip"><input type="checkbox" name="pets"><span>Has / OK with pets</span></label>
+          <label class="chip"><input type="checkbox" name="veg"><span>Vegetarian</span></label>
+        </div>
+        <label>Cleanliness <output id="cleanOut">3</output>/5<input name="cleanliness" type="range" min="1" max="5"></label>
+        <div class="row">
+          <label>Sleep<select name="sleep"><option value="early">Early bird</option><option value="late">Night owl</option><option value="flexible">Flexible</option></select></label>
+          <label>Guests<select name="guests"><option value="rarely">Rarely</option><option value="sometimes">Sometimes</option><option value="often">Often</option></select></label>
+        </div>
+        <label>Show me<select name="pref_gender"><option value="any">Everyone</option><option value="male">Male only</option><option value="female">Female only</option></select></label>
+        <p class="err" id="profErr"></p>
+        <button class="btn primary" type="submit">Save profile</button>
+        <button class="btn ghost" type="button" id="logoutBtn">Log out</button>
+        <button class="btn danger" type="button" id="deleteBtn">Delete account</button>
+      </form>
+    </div>
+
+    <nav class="bottomnav">
+      <button data-view="discover" class="active"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="3"/></svg><span>Discover</span></button>
+      <button data-view="matches"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>Matches</span><i class="badge hidden" id="mBadge"></i></button>
+      <button data-view="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Profile</span></button>
+    </nav>
+  </section>
+
+  <section id="chat" class="screen hidden">
+    <header class="topbar">
+      <button class="icon-btn" id="chatBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="title" id="chatTitle"></span>
+      <button class="icon-btn" id="chatMenu" aria-label="Options"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    </header>
+    <div id="msgs" class="msgs"></div>
+    <form id="chatForm" class="chatbar">
+      <input id="chatInput" maxlength="1000" placeholder="Type a message" autocomplete="off">
+      <button class="btn primary small" type="submit">Send</button>
+    </form>
+  </section>
+
+  <div id="sheet" class="sheet hidden"><div class="sheet-body" id="sheetBody"></div></div>
+  <div id="matchPop" class="matchpop hidden">
+    <h2>It's a Match!</h2><p id="matchPopText"></p>
+    <button class="btn primary" id="matchChat">Send a message</button>
+    <button class="btn ghost light" id="matchKeep">Keep swiping</button>
+  </div>
+  <div id="toast" class="toast hidden"></div>
+</div>
+</body>
+</html>

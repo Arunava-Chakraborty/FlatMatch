@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: flatmatch
+    runtime: docker
+    plan: free               # data lives in Neon Postgres, so the free plan is fine
+    region: singapore
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL     # paste your Neon connection string in the Render dashboard
+        sync: false
+      - key: ADMIN_PASSWORD   # 12+ characters, set in the Render dashboard
+        sync: false
+      - key: FLATMATCH_SECRET
+        generateValue: true
+      - key: FLATMATCH_SECURE_COOKIE
+        value: "1"
